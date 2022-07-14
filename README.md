@@ -51,7 +51,7 @@ create new context.
 - `parent:context`: a parent context.
 - `duration:integer`: specify a timeout duration `milliseconds` as unsigned integer.
 - `key:string`: a key string to access the the specified value.
-- `val:any: any value associated with key.
+- `val:any`: any value associated with `key`.
 
 **Returns**
 
