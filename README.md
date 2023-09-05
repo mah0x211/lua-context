@@ -31,8 +31,8 @@ local function busyfunc(ctx)
     end
 end
 
--- create new context with timeout
-local ctx, cancel = context.new(nil, 100)
+-- create new context with timeout duration 100ms.
+local ctx, cancel = context.new(nil, 0.1)
 local done, err = busyfunc(ctx)
 print(done, err) -- true ...: [ETIMEDOUT:60][context] Operation timed out
 ```
@@ -49,7 +49,7 @@ create new context.
 **Parameters**
 
 - `parent:context`: a parent context.
-- `duration:integer`: specify a timeout duration `milliseconds` as unsigned integer.
+- `duration:number`: specify a timeout duration `seconds` as number. if `<0` specified, the context will be timeout immediately.
 - `key:string`: a key string to access the the specified value.
 - `val:any`: any value associated with `key`.
 
@@ -61,7 +61,8 @@ create new context.
 
 ## deadline = ctx:deadline()
 
-get a deadline based on a monotonic clock.
+get a deadline based on a monotonic clock.  
+if the `duration` is not specified to `context.new` function, this method will return `nil`.
 
 **Returns**
 

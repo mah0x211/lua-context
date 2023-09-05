@@ -19,27 +19,36 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 -- THE SOFTWARE.
 --
+local type = type
 local new_errno = require('errno').new
-local gettime = require('clock').gettime
+local gettime = require('time.clock').gettime
 local gcfn = require('gcfn')
-local isa = require('isa')
-local is_uint = isa.uint
-local is_string = isa.string
 local metamodule = require('metamodule')
 local new_metamodule = metamodule.new
 local instanceof = metamodule.instanceof
 
+--- constants
+local INF_POS = math.huge
+local INF_NEG = -math.huge
+
+--- is_finite returns true if x is finite number
+--- @param x number
+--- @return boolean
+local function is_finite(x)
+    return type(x) == 'number' and (x < INF_POS and x >= INF_NEG)
+end
+
 --- @class context
 --- @field done boolean
---- @field err? error
---- @field duration? number
+--- @field err any
+--- @field etime? number
 --- @field key? string
 --- @field val? any
 local Context = {}
 
 --- init
 --- @param parent context
---- @param duration integer
+--- @param duration number?
 --- @param key string
 --- @param val any
 --- @return context ctx
@@ -50,14 +59,16 @@ function Context:init(parent, duration, key, val)
     end
 
     if duration then
-        if not is_uint(duration) then
-            error('duration must be uint', 2)
+        if not is_finite(duration) then
+            error('duration must be finite number', 2)
+        elseif duration < 0 then
+            duration = 0
         end
-        self.duration = gettime() + duration / 1000
+        self.etime = gettime() + duration
     end
 
     if key ~= nil then
-        if not is_string(key) then
+        if type(key) ~= 'string' then
             error('key must be string', 2)
         elseif val ~= nil then
             self.key = key
@@ -83,16 +94,16 @@ function Context:init(parent, duration, key, val)
 end
 
 --- deadline
---- @return integer timeout
+--- @return number? deadline
 function Context:deadline()
-    return self.duration
+    return self.etime
 end
 
 --- get
 --- @param key string
 --- @return any val
 function Context:get(key)
-    if not is_string(key) then
+    if type(key) ~= 'string' then
         error('key must be string', 2)
     elseif self.key == key then
         return self.val
@@ -103,7 +114,7 @@ function Context:get(key)
 end
 
 --- error
---- @return error err
+--- @return any err
 function Context:error()
     if self.gced then
         self.gced = nil
@@ -114,15 +125,21 @@ end
 
 --- is_done
 --- @return boolean done
---- @return error? err
+--- @return any err
 function Context:is_done()
     if self.done then
         return true, self:error()
-    elseif self.duration and gettime() > self.duration then
-        self.done = true
-        self.err = new_errno('ETIMEDOUT', nil, 'context')
-        return true, self.err
-    elseif self.parent then
+    end
+
+    if self.etime then
+        self.done = gettime() >= self.etime
+        if self.done then
+            self.err = new_errno('ETIMEDOUT', nil, 'context')
+            return true, self.err
+        end
+    end
+
+    if self.parent then
         self.done, self.err = self.parent:is_done()
         return self.done, self.err
     end
