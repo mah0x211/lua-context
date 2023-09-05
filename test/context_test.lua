@@ -1,8 +1,8 @@
 require('luacov')
 local assert = require('assert')
 local errno = require('errno')
-local gettime = require('clock').gettime
-local msleep = require('nanosleep.msleep')
+local gettime = require('time.clock').gettime
+local sleep = require('time.sleep')
 local context = require('context')
 
 local testcase = {}
@@ -42,21 +42,32 @@ end
 
 function testcase.with_duration()
     -- test that create new context with duration
-    local duration = 200
+    local duration = 0.2
     local ctx, cancel = context.new(nil, duration)
     assert.match(ctx, '^context: ', false)
     assert.is_func(cancel)
-    assert.less(ctx:deadline(), gettime() + duration / 1000)
+    assert.less(ctx:deadline(), gettime() + duration)
+
+    -- test that is_done return false if not timed out or cancelled
+    local ok, err = ctx:is_done()
+    assert.is_false(ok)
+    assert.is_nil(err)
 
     -- test that is_done return true and ETIMEDOUT
-    msleep(duration)
-    local ok, err = ctx:is_done()
+    sleep(duration)
+    ok, err = ctx:is_done()
     assert.is_true(ok)
     assert.equal(err.type, errno.ETIMEDOUT)
 
-    -- test that throws an error if duration is not uint
-    err = assert.throws(context.new, nil, 1.4)
-    assert.match(err, 'duration must be uint')
+    -- test that is_done return true and ETIMEDOUT immediately
+    ctx, cancel = context.new(nil, -1)
+    ok, err = ctx:is_done()
+    assert.is_true(ok)
+    assert.equal(err.type, errno.ETIMEDOUT)
+
+    -- test that throws an error if duration is not finite number
+    err = assert.throws(context.new, nil, 0 / 0)
+    assert.match(err, 'duration must be finite number')
 end
 
 function testcase.with_keyval()
@@ -117,9 +128,9 @@ function testcase.with_parent()
     end
 
     -- test that is_done return true and ETIMEDOUT
-    pctx, pcancel = context.new(nil, 200)
+    pctx, pcancel = context.new(nil, 0.2)
     ctx, cancel = context.new(pctx)
-    msleep(200)
+    sleep(0.2)
     for _, c in ipairs({
         pctx,
         ctx,

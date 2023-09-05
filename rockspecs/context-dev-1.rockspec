@@ -11,10 +11,9 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "clock >= 0.1.0",
+    "time-clock >= 0.3.0",
     "errno >= 0.3.0",
     "gcfn >= 0.3.0",
-    "isa >= 0.3.0",
     "metamodule >= 0.4.0",
 }
 build = {

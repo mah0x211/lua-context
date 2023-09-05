@@ -55,7 +55,7 @@ jobs:
       run: |
         luarocks install luacov
         luarocks install assert
-        luarocks install nanosleep
+        luarocks install time-sleep
     -
       name: Install
       run: |
