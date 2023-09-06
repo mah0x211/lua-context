@@ -22,7 +22,6 @@
 local type = type
 local new_errno = require('errno').new
 local gettime = require('time.clock').gettime
-local gcfn = require('gcfn')
 local metamodule = require('metamodule')
 local new_metamodule = metamodule.new
 local instanceof = metamodule.instanceof
@@ -76,17 +75,10 @@ function Context:init(parent, duration, key, val)
         end
     end
 
-    local gco = gcfn(function(ctx)
-        ctx.gced = true
-        ctx.done = true
-    end, self)
-
     local ctx = self
     self.parent = parent
     return self, function()
         if not ctx.done then
-            gco:disable()
-            gco = nil
             ctx.done = true
             ctx.err = new_errno('ECANCELED', nil, 'context')
         end
@@ -116,10 +108,6 @@ end
 --- error
 --- @return any err
 function Context:error()
-    if self.gced then
-        self.gced = nil
-        self.err = new_errno('ECANCELED', 'by GC', 'context')
-    end
     return self.err
 end
 
