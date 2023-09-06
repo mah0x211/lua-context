@@ -21,10 +21,15 @@
 --
 local type = type
 local new_errno = require('errno').new
-local gettime = require('time.clock').gettime
-local metamodule = require('metamodule')
-local new_metamodule = metamodule.new
-local instanceof = metamodule.instanceof
+local new_metamodule = require('metamodule').new
+local instanceof = require('metamodule').instanceof
+
+--- @class time.clock.deadline
+--- @field time fun():number
+--- @field remain fun():number
+
+--- @type fun(duration?: number):(d:time.clock.deadline, sec:number)
+local new_deadline = require('time.clock.deadline').new
 
 --- constants
 local INF_POS = math.huge
@@ -40,7 +45,7 @@ end
 --- @class context
 --- @field done boolean
 --- @field err any
---- @field etime? number
+--- @field deadl? time.clock.deadline
 --- @field key? string
 --- @field val? any
 local Context = {}
@@ -63,7 +68,7 @@ function Context:init(parent, duration, key, val)
         elseif duration < 0 then
             duration = 0
         end
-        self.etime = gettime() + duration
+        self.deadl = new_deadline(duration)
     end
 
     if key ~= nil then
@@ -88,7 +93,9 @@ end
 --- deadline
 --- @return number? deadline
 function Context:deadline()
-    return self.etime
+    if self.deadl then
+        return self.deadl:time()
+    end
 end
 
 --- get
@@ -119,8 +126,8 @@ function Context:is_done()
         return true, self:error()
     end
 
-    if self.etime then
-        self.done = gettime() >= self.etime
+    if self.deadl then
+        self.done = self.deadl:remain() == 0
         if self.done then
             self.err = new_errno('ETIMEDOUT', nil, 'context')
             return true, self.err
