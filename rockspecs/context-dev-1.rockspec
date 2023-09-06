@@ -11,7 +11,7 @@ description = {
 }
 dependencies = {
     "lua >= 5.1",
-    "time-clock >= 0.3.0",
+    "time-clock >= 0.4.0",
     "errno >= 0.3.0",
     "metamodule >= 0.4.0",
 }
