@@ -91,11 +91,9 @@ function Context:init(parent, duration, key, val)
 end
 
 --- deadline
---- @return number? deadline
+--- @return time.clock.deadline? deadl
 function Context:deadline()
-    if self.deadl then
-        return self.deadl:time()
-    end
+    return self.deadl
 end
 
 --- get

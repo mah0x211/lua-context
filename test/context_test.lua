@@ -34,7 +34,8 @@ function testcase.with_duration()
     local ctx, cancel = context.new(nil, duration)
     assert.match(ctx, '^context: ', false)
     assert.is_func(cancel)
-    assert.less(ctx:deadline(), gettime() + duration)
+    local deadl = assert(ctx:deadline())
+    assert.less(deadl:time(), gettime() + duration)
 
     -- test that is_done return false if not timed out or cancelled
     local ok, err = ctx:is_done()
