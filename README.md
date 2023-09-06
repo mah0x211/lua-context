@@ -59,14 +59,15 @@ create new context.
 - `cancel:function`: cancel function. if this function is not called, the context is never canceled.
 
 
-## deadline = ctx:deadline()
+## deadl = ctx:deadline()
 
-get a deadline based on a monotonic clock.  
+get an instance of `time.clock.deadline`.  
 if the `duration` is not specified to `context.new` function, this method will return `nil`.
 
 **Returns**
 
-- `deadline:number`: number of seconds based on monotonic clock.
+- `deadl:time.clock.deadline`: an instance of `time.clock.deadline`.  
+  please see https://github.com/mah0x211/lua-time-clock#deadl-sec--deadlinenew-sec- for usage.
 
 
 ## val = ctx:get( key )
