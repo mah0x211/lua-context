@@ -26,18 +26,6 @@ function testcase.new()
     assert.is_true(ok)
     assert.equal(err.type, errno.ECANCELED)
     assert.equal(ctx:error(), err)
-
-    -- test that is_done return true and ECANCELED by GC
-    do
-        local _
-        ctx, _ = context.new()
-    end
-    assert.is_false(ctx:is_done())
-    collectgarbage('collect')
-    ok, err = ctx:is_done()
-    assert.is_true(ok)
-    assert.equal(err.type, errno.ECANCELED)
-    assert.match(err, 'by GC')
 end
 
 function testcase.with_duration()

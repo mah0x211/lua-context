@@ -56,7 +56,7 @@ create new context.
 **Returns**
 
 - `ctx:context`: an instance of context.
-- `cancel:function`: cancel function.
+- `cancel:function`: cancel function. if this function is not called, the context is never canceled.
 
 
 ## deadline = ctx:deadline()
