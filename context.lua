@@ -103,6 +103,17 @@ function Context:deadline()
     return self.parent:deadline()
 end
 
+--- time_left returns time left in seconds of the timeout deadline
+--- @return number? sec
+function Context:time_left()
+    if self.deadl then
+        return self.deadl:remain()
+    elseif not self.parent then
+        return nil
+    end
+    return self.parent:time_left()
+end
+
 --- get
 --- @param key string
 --- @return any val
