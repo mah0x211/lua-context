@@ -104,5 +104,5 @@ detects whether a context is done.
 - `err:error`: if a done is `true`, err will be one of the following value;
   - `errno.ECANCELED`: a context was canceled by the `cancel` function or `GC`.
   - `errno.ETIMEDOUT`: the specified duration has elapsed.
-
+- `timedout:boolean`: `true` if the context is timed out.
 
