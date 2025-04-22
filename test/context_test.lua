@@ -13,6 +13,7 @@ function testcase.new()
     assert.match(ctx, '^context: ', false)
     assert.is_func(cancel)
     assert.is_nil(ctx:deadline())
+    assert.is_nil(ctx:time_left())
     assert.is_nil(ctx:error())
 
     -- test that is_done return false if not cancelled
@@ -36,6 +37,9 @@ function testcase.with_duration()
     assert.is_func(cancel)
     local deadl = assert(ctx:deadline())
     assert.less(deadl:time(), gettime() + duration)
+    local tl = assert(ctx:time_left())
+    assert.less_or_equal(tl, 0.2)
+    assert.greater(tl, 0.19)
 
     -- test that is_done return false if not timed out or cancelled
     local ok, err = ctx:is_done()
@@ -47,6 +51,9 @@ function testcase.with_duration()
     ok, err = ctx:is_done()
     assert.is_true(ok)
     assert.equal(err.type, errno.ETIMEDOUT)
+
+    -- test that time_left return 0
+    assert.equal(ctx:time_left(), 0)
 
     -- test that is_done return true and ETIMEDOUT immediately
     ctx, cancel = context.new(nil, -1)
@@ -122,6 +129,10 @@ function testcase.with_parent()
     -- confirm that deadline is retrieved from parent
     local deadl = assert(ctx:deadline())
     assert.equal(deadl, pctx:deadline())
+    -- confirm that time_left is retrieved from parent
+    local tl = assert(ctx:time_left())
+    assert.less_or_equal(tl, 0.2)
+    assert.greater(tl, 0.19)
 
     sleep(0.2)
     for _, c in ipairs({
