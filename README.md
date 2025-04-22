@@ -62,7 +62,8 @@ create new context.
 ## deadl = ctx:deadline()
 
 get an instance of `time.clock.deadline`.  
-if the `duration` is not specified to `context.new` function, this method will return `nil`.
+if the `duration` argument is not provided when calling `context.new`, it attempts to call the `ctx:deadline()` of the `parent` context.
+if no `parent` context is specified, it returns `nil`.
 
 **Returns**
 

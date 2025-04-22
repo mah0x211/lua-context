@@ -95,7 +95,12 @@ end
 --- deadline
 --- @return time.clock.deadline? deadl
 function Context:deadline()
-    return self.deadl
+    if self.deadl then
+        return self.deadl
+    elseif not self.parent then
+        return nil
+    end
+    return self.parent:deadline()
 end
 
 --- get
@@ -106,10 +111,10 @@ function Context:get(key)
         error('key must be string', 2)
     elseif self.key == key then
         return self.val
-    elseif self.parent then
-        return self.parent:get(key)
+    elseif not self.parent then
+        return nil
     end
-    return nil
+    return self.parent:get(key)
 end
 
 --- error

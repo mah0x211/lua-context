@@ -119,6 +119,10 @@ function testcase.with_parent()
     -- test that is_done return true and ETIMEDOUT
     pctx, pcancel = context.new(nil, 0.2)
     ctx, cancel = context.new(pctx)
+    -- confirm that deadline is retrieved from parent
+    local deadl = assert(ctx:deadline())
+    assert.equal(deadl, pctx:deadline())
+
     sleep(0.2)
     for _, c in ipairs({
         pctx,
