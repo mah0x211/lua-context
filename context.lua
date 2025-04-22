@@ -43,8 +43,10 @@ local function is_finite(x)
 end
 
 --- @class context
+--- @field parent context?
 --- @field done boolean
 --- @field err any
+--- @field timedout boolean?
 --- @field deadl? time.clock.deadline
 --- @field key? string
 --- @field val? any
@@ -119,16 +121,18 @@ end
 --- is_done
 --- @return boolean done
 --- @return any err
+--- @return boolean? timedout
 function Context:is_done()
     if self.done then
-        return true, self:error()
+        return true, self.err, self.timedout
     end
 
     if self.deadl then
         self.done = self.deadl:remain() == 0
         if self.done then
             self.err = new_errno('ETIMEDOUT', nil, 'context')
-            return true, self.err
+            self.timedout = true
+            return true, self.err, true
         end
     end
 
