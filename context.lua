@@ -142,8 +142,8 @@ function Context:is_done()
     end
 
     if self.parent then
-        self.done, self.err = self.parent:is_done()
-        return self.done, self.err
+        self.done, self.err, self.timedout = self.parent:is_done()
+        return self.done, self.err, self.timedout
     end
     return false
 end
